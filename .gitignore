@@ -1,0 +1,31 @@
+# Real credentials — never commit
+.env
+.env.local
+.env.*.local
+.env.production
+
+# Template is committed (no real values)
+!.env.example
+
+# OS / editor / tooling
+.DS_Store
+*.swp
+*.swo
+.vscode/
+.idea/
+.ade/
+.tool-versions.bak
+
+# Node
+node_modules/
+dist/
+.vite/
+
+# Logs
+*.log
+logs/
+
+# Tests / artifacts
+coverage/
+playwright-report/
+test-results/
