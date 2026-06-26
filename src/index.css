@@ -2,32 +2,241 @@
 
 @theme inline {
   --color-background: #ffffff;
-  --color-foreground: #09090b;
+  --color-foreground: #0f172a;
   --color-card: #ffffff;
-  --color-card-foreground: #09090b;
+  --color-card-foreground: #0f172a;
   --color-popover: #ffffff;
-  --color-popover-foreground: #09090b;
-  --color-primary: #18181b;
+  --color-popover-foreground: #0f172a;
+  --color-primary: #2563eb;
   --color-primary-foreground: #ffffff;
-  --color-secondary: #f4f4f5;
-  --color-secondary-foreground: #18181b;
-  --color-muted: #f4f4f5;
-  --color-muted-foreground: #71717a;
-  --color-accent: #f4f4f5;
-  --color-accent-foreground: #18181b;
+  --color-secondary: #f1f5f9;
+  --color-secondary-foreground: #475569;
+  --color-muted: #f1f5f9;
+  --color-muted-foreground: #64748b;
+  --color-accent: #10b981;
+  --color-accent-foreground: #ffffff;
   --color-destructive: #ef4444;
   --color-destructive-foreground: #ffffff;
-  --color-border: #e4e4e7;
-  --color-input: #e4e4e7;
-  --color-ring: #18181b;
-  --radius: 0.5rem;
-  --color-chart-1: #18181b;
-  --color-chart-2: #71717a;
-  --color-chart-3: #a1a1aa;
-  --color-chart-4: #d4d4d8;
-  --color-chart-5: #f4f4f5;
+  --color-border: #e2e8f0;
+  --color-input: #e2e8f0;
+  --color-ring: #2563eb;
+  --radius: 0.75rem;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-gold: #eab308;
+  --color-chart-1: #2563eb;
+  --color-chart-2: #10b981;
+  --color-chart-3: #eab308;
+  --color-chart-4: #ef4444;
+  --color-chart-5: #8b5cf6;
 }
 
 body {
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--color-background);
+  color: var(--color-foreground);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: #2563eb;
+  color: white;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.4s ease-out;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.3s ease-out;
+}
+
+.card-shadow {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.card-shadow-hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--color-ring);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: var(--color-primary-foreground);
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background: var(--color-secondary);
+  color: var(--color-secondary-foreground);
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background: #e2e8f0;
+}
+
+/* ============================================================
+   AWS Amplify Face Liveness — visual overrides
+   The Amplify UI ships a light theme by default. We force:
+   - Light backgrounds on container elements (avoid dark text on dark)
+   - Consistent rounded corners + subtle borders
+   - Reasonable sizing on mobile (don't go fullscreen fixed)
+   ============================================================ */
+
+[data-amplify-theme] {
+  --amplify-components-liveness-camera-module-background-color: transparent;
+  --amplify-colors-font-primary: #0f172a;
+  --amplify-colors-font-secondary: #475569;
+  --amplify-colors-font-tertiary: #64748b;
+  --amplify-colors-background-primary: #ffffff;
+  --amplify-colors-background-secondary: #f1f5f9;
+  --amplify-colors-border-primary: #e2e8f0;
+  --amplify-colors-border-secondary: #cbd5e1;
+  --amplify-colors-neutral-40: #e2e8f0;
+  --amplify-colors-neutral-80: #475569;
+  --amplify-colors-blue-90: #1e40af;
+  --amplify-colors-blue-10: #dbeafe;
+  --amplify-colors-blue-20: #bfdbfe;
+}
+
+.amplify-liveness-camera-module {
+  background-color: transparent !important;
+  border: none !important;
+  border-radius: 1rem !important;
+  overflow: hidden !important;
+  position: relative;
+  box-shadow: none !important;
+}
+
+.amplify-liveness-camera-module--mobile {
+  position: relative !important;
+  height: 480px !important;
+  width: 100% !important;
+  max-width: 28rem !important;
+  margin: 0 auto !important;
+  top: auto !important;
+  left: auto !important;
+}
+
+.amplify-liveness-video,
+.amplify-liveness-oval-canvas,
+.amplify-liveness-freshness-canvas {
+  border-radius: 1rem !important;
+}
+
+.amplify-liveness-start-screen-header__heading,
+.amplify-liveness-start-screen-header__body,
+.amplify-liveness-start-screen-instructions__heading,
+.amplify-liveness-start-screen-instructions__list,
+.amplify-liveness-start-screen-instructions li {
+  color: #0f172a !important;
+}
+
+.amplify-liveness-start-screen-warning {
+  color: #1e40af !important;
+  background-color: #dbeafe !important;
+  border: 1px solid #bfdbfe !important;
+  border-radius: 0.5rem !important;
+}
+
+.amplify-liveness-toast {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: 0.5rem !important;
+}
+
+.amplify-liveness-recording-icon {
+  background-color: rgba(15, 23, 42, 0.7) !important;
+}
+
+.amplify-liveness-cancel-button,
+.amplify-liveness-cancel-container button {
+  color: #0f172a !important;
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  border-radius: 9999px !important;
+  border: 1px solid var(--color-border) !important;
+}
+
+@keyframes liveness-progress {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(400%);
+  }
+}
+
+.liveness-progress-bar {
+  position: relative;
+  height: 4px;
+  background-color: var(--color-secondary);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.liveness-progress-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 25%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, var(--color-primary), transparent);
+  animation: liveness-progress 1.4s ease-in-out infinite;
 }
