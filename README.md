@@ -2,7 +2,7 @@
 
 SPA React 19 + Vite 6 + Tailwind v4 + shadcn/ui. La usan los socios para registrarse y (futuro) acceder a su perfil.
 
-> **Contexto completo para LLM/humano nuevo**: leé [`/README.md`](../../README.md), [`/AGENTS.md`](../../AGENTS.md), y [`/SPEC.md`](../../SPEC.md) primero.
+> **Contexto completo para LLM/humano nuevo**: leé [`/README.md`](../../README.md), [`/AGENTS.md`](../../AGENTS.md), y [`/SPEC.md`](https://github.com/arnigon-holdings/app-socios-estadio-docs/blob/main/SPEC.md) (en el docs repo) primero.
 
 ## Quickstart
 
@@ -42,20 +42,18 @@ frontend/
 │   │   └── use-toast.ts
 │   ├── lib/
 │   │   ├── api.ts                ← fetchApi + endpoints
-│   │   ├── amplify-config.ts      ← Amplify.configure con Cognito
+│   │   ├── amplify-config.ts     ← Amplify.configure con Cognito
 │   │   ├── rut.ts                ← formatRUT compartido (7-9 dígitos + K)
 │   │   ├── logger.ts             ← createLogger(name) → console + structured
 │   │   └── utils.ts
 │   ├── types/                    ← User, Team, etc
 │   └── index.css                 ← Tailwind + Amplify overrides
-├── terraform/                    ← Lambda + API Gateway (Face Liveness backend)
-│   ├── main.tf
-│   ├── modules/{cognito,iam,lambda,apigateway}/
-│   └── variables.tf
 ├── tests/                        ← Playwright E2E
 ├── .env.example                  ← template tracked
-└── .env                          ← (gitignored) dev secrets
+└── .env.development              ← tracked dev defaults (sin secretos reales)
 ```
+
+> **Terraform del Face Liveness** (API Gateway + Lambda + Cognito + IAM) NO vive en este repo. Está en [`infrastructure/frontend-liveness/`](https://github.com/arnigon-holdings/app-socios-estadio-infra/tree/main/infrastructure/frontend-liveness) del repo raíz (`app-socios-estadio-infra`).
 
 ## Endpoints que consume
 
@@ -158,8 +156,8 @@ Estas credenciales dan al Amplify SDK acceso temporal a AWS (para FaceLivenessDe
 ### Dónde cambiar cada clave (resumen rápido)
 
 - **Cambiar URL del backend**: `VITE_API_BASE_URL` en `.env.development` (dev) o `.env.production` (build). Requiere rebuild.
-- **Cambiar API Gateway de Face Liveness**: pedir nuevo deploy Terraform (`frontend/terraform/`), obtener `api_key_value` del output, setear `VITE_FACE_LIVENESS_API_URL` + `VITE_FACE_LIVENESS_API_KEY`. Rebuild.
-- **Cambiar Cognito**: redeploy Terraform, actualizar las 3 vars `VITE_COGNITO_*`. Rebuild.
+- **Cambiar API Gateway de Face Liveness**: redeploy Terraform en [`infrastructure/frontend-liveness/`](https://github.com/arnigon-holdings/app-socios-estadio-infra/tree/main/infrastructure/frontend-liveness) (repo `app-socios-estadio-infra`), obtener `api_key_value` del output, setear `VITE_FACE_LIVENESS_API_URL` + `VITE_FACE_LIVENESS_API_KEY`. Rebuild.
+- **Cambiar Cognito**: redeploy Terraform (mismo path arriba), actualizar las 3 vars `VITE_COGNITO_*`. Rebuild.
 - **Cambiar token face-search**: `VITE_FACE_SEARCH_TOKEN`. Rotar también en `face-search-service/.env.development` (dev) o Secret Manager (prod).
 - **Probar en local sin secrets reales**: dejar `VITE_FACE_LIVENESS_API_KEY=` vacío causa error explícito en `vite.config.ts:9`. OK si querés que el dev server no arranque hasta setearlo.
 
