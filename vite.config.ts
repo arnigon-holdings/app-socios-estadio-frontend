@@ -3,10 +3,14 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
 
+const FACE_LIVENESS_API_URL = process.env.VITE_FACE_LIVENESS_API_URL ?? ''
 const FACE_LIVENESS_API_KEY = process.env.VITE_FACE_LIVENESS_API_KEY ?? ''
 
 if (!FACE_LIVENESS_API_KEY) {
   throw new Error('VITE_FACE_LIVENESS_API_KEY is required. Copy frontend/.env.example to frontend/.env and fill it in.')
+}
+if (!FACE_LIVENESS_API_URL) {
+  throw new Error('VITE_FACE_LIVENESS_API_URL is required. Copy frontend/.env.example to frontend/.env and fill it in.')
 }
 
 export default defineConfig({
@@ -18,7 +22,7 @@ export default defineConfig({
       configureServer(server) {
         server.middlewares.use('/face-liveness', async (req, res) => {
           const apiPath = req.url!.replace(/^\/face-liveness/, '') || '/'
-          const url = `https://a8rgaq8bv0.execute-api.us-east-1.amazonaws.com/prod/face-liveness${apiPath}`
+          const url = `${FACE_LIVENESS_API_URL.replace(/\/$/, '')}${apiPath}`
           const headers: Record<string, string> = {
             'X-Api-Key': FACE_LIVENESS_API_KEY,
           }
@@ -56,7 +60,7 @@ export default defineConfig({
     port: 5174,
     proxy: {
       '/api': {
-        target: 'http://localhost:3000',
+        target: process.env.VITE_API_BASE_URL ?? 'http://localhost:3000',
         changeOrigin: true,
       },
     },

@@ -98,17 +98,76 @@ npm run test:ui              # playwright con UI
 
 ## Env vars
 
-`VITE_*` (expuestas al bundle):
+Toda configuración viene de variables de entorno `VITE_*` (expuestas al bundle en build time). **No hay secretos hardcodeados en código**.
 
-| Var | Descripción |
-|---|---|
-| `VITE_API_BASE_URL` | URL del backend Rails |
-| `VITE_AWS_REGION` | us-east-1 |
-| `VITE_FACE_LIVENESS_API_URL` | URL del API Gateway (Face Liveness) — Vite dev proxy usa esto |
-| `VITE_FACE_LIVENESS_API_KEY` | API key del API Gateway (header `X-Api-Key`) |
-| `VITE_COGNITO_IDENTITY_POOL_ID` | Cognito Identity Pool (Amplify SDK) |
-| `VITE_COGNITO_USER_POOL_ID` | Cognito User Pool |
-| `VITE_COGNITO_USER_POOL_CLIENT_ID` | Cognito User Pool Client |
+### Archivos de configuración
+
+| Archivo | Estado | Propósito |
+|---|---|---|
+| `frontend/.env.example` | tracked | Template con todas las variables (placeholders) |
+| `frontend/.env.development` | tracked (sin secretos reales) | Defaults de dev — el dev server arranca con valores placeholder |
+| `frontend/.env.production` | gitignored | Build de prod con valores reales (deploy lo setea) |
+| `frontend/.env.local` | gitignored | Override local — Vite lo lee pero no lo commitea |
+
+> **Vite solo lee `.env`, `.env.local`, `.env.development`, `.env.production`**. Los archivos deben tener el prefijo `VITE_` para ser accesibles desde el código (`import.meta.env.VITE_*`).
+
+### Tabla de variables
+
+#### Backend API
+
+| Var | Requerida | Default dev | Para qué sirve |
+|---|---|---|---|
+| `VITE_API_BASE_URL` | sí | `http://localhost:3000` | URL del backend Rails. Llamadas fetch en `src/lib/api.ts`. |
+
+#### AWS region
+
+| Var | Requerida | Default dev | Para qué sirve |
+|---|---|---|---|
+| `VITE_AWS_REGION` | sí | `us-east-1` | Región AWS usada por Amplify SDK y Face Liveness |
+
+#### Face Liveness (API Gateway + Lambda)
+
+| Var | Requerida | Default dev | Para qué sirve |
+|---|---|---|---|
+| `VITE_FACE_LIVENESS_API_URL` | **sí** | — | URL completa del API Gateway (`https://<id>.execute-api.us-east-1.amazonaws.com/prod/face-liveness`). Usada por el Vite dev proxy (`vite.config.ts`) y por el SDK en prod. |
+| `VITE_FACE_LIVENESS_API_KEY` | **sí** | — | API key del API Gateway (header `X-Api-Key`). **El build falla si falta** (`vite.config.ts` lanza error). |
+
+> En el código: `vite.config.ts` lee ambos como `process.env.VITE_*` para armar el proxy en dev. En runtime, `src/components/face-liveness.tsx` también lee `VITE_FACE_LIVENESS_API_KEY` para pasarlo como header.
+
+#### Cognito (Amplify SDK)
+
+Estas credenciales dan al Amplify SDK acceso temporal a AWS (para FaceLivenessDetector).
+
+| Var | Requerida | Default dev | Para qué sirve |
+|---|---|---|---|
+| `VITE_COGNITO_IDENTITY_POOL_ID` | sí | — | Cognito Identity Pool ID (formato `region:guid`) |
+| `VITE_COGNITO_USER_POOL_ID` | sí | — | Cognito User Pool ID (formato `region_alnum`) |
+| `VITE_COGNITO_USER_POOL_CLIENT_ID` | sí | — | Cognito User Pool Client ID (alnum) |
+
+> Leídos en `src/lib/amplify-config.ts` (Amplify.configure).
+
+#### Face search (opcional)
+
+| Var | Requerida | Default dev | Para qué sirve |
+|---|---|---|---|
+| `VITE_FACE_SEARCH_URL` | no | `http://localhost:8081` | URL del Go face-search service |
+| `VITE_FACE_SEARCH_TOKEN` | no | — | Bearer token compartido con Go service. Si está vacío, no se manda Authorization header. |
+
+> Leídos en `src/lib/api.ts` → `searchFaceRequest()`.
+
+### Dónde cambiar cada clave (resumen rápido)
+
+- **Cambiar URL del backend**: `VITE_API_BASE_URL` en `.env.development` (dev) o `.env.production` (build). Requiere rebuild.
+- **Cambiar API Gateway de Face Liveness**: pedir nuevo deploy Terraform (`frontend/terraform/`), obtener `api_key_value` del output, setear `VITE_FACE_LIVENESS_API_URL` + `VITE_FACE_LIVENESS_API_KEY`. Rebuild.
+- **Cambiar Cognito**: redeploy Terraform, actualizar las 3 vars `VITE_COGNITO_*`. Rebuild.
+- **Cambiar token face-search**: `VITE_FACE_SEARCH_TOKEN`. Rotar también en `face-search-service/.env.development` (dev) o Secret Manager (prod).
+- **Probar en local sin secrets reales**: dejar `VITE_FACE_LIVENESS_API_KEY=` vacío causa error explícito en `vite.config.ts:9`. OK si querés que el dev server no arranque hasta setearlo.
+
+### Gotchas
+
+- **`VITE_FACE_LIVENESS_API_KEY` debe existir en build time**. El `vite.config.ts` lanza error si falta.
+- **Cambiar cualquier `VITE_*` requiere restart del dev server** (`npm run dev`) o rebuild (`npm run build`).
+- **Las vars se exponen al bundle**. Es público lo que esté en `VITE_*`. No poner secretos que no quieras en el JS bundle.
 
 ## Gotchas
 
