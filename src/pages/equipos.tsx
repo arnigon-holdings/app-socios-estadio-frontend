@@ -3,7 +3,7 @@ import { useAuth } from '@/hooks/use-auth'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Loader2, ArrowLeft, Check } from 'lucide-react'
+import { Loader2, ArrowLeft, Check, Shield, Users } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { api } from '@/lib/api'
 import { cn } from '@/lib/utils'
@@ -54,7 +54,7 @@ export function EquiposPage() {
     try {
       await api.patch('/api/v1/me', { teams_ids: selectedIds })
       await checkAuth()
-      setSuccess('Equipos actualizados correctamente')
+      setSuccess('¡Equipos actualizados correctamente!')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al guardar')
     } finally {
@@ -64,82 +64,108 @@ export function EquiposPage() {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      <div className="flex h-screen items-center justify-center bg-background">
+        <div className="text-center">
+          <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">Cargando equipos...</p>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-muted/50">
-      <header className="bg-primary px-4 py-4">
-        <div className="mx-auto max-w-md flex items-center gap-3">
-          <Button variant="ghost" size="icon" asChild className="text-primary-foreground">
+    <div className="min-h-screen bg-secondary/30">
+      <header className="bg-white border-b border-border px-6 py-4">
+        <div className="max-w-2xl mx-auto flex items-center gap-3">
+          <Button variant="ghost" size="icon" asChild className="text-muted-foreground hover:text-foreground">
             <Link to="/app/dashboard">
               <ArrowLeft className="h-5 w-5" />
             </Link>
           </Button>
-          <span className="text-lg font-semibold text-primary-foreground">Equipos Favoritos</span>
+          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
+            <Shield className="h-5 w-5 text-white" />
+          </div>
+          <span className="text-lg font-semibold text-foreground">Equipos Favoritos</span>
         </div>
       </header>
 
-      <main className="mx-auto max-w-md px-4 py-6 space-y-6">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Selecciona tus equipos</CardTitle>
+      <main className="max-w-2xl mx-auto px-6 py-8">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-foreground mb-1">Equipos Favoritos</h1>
+          <p className="text-muted-foreground">Selecciona hasta 5 equipos</p>
+        </div>
+
+        <Card className="bg-white card-shadow">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Users className="h-4 w-4 text-primary" />
+              Selecciona tus equipos
+            </CardTitle>
             <CardDescription>
               Puedes elegir hasta 5 equipos favoritos
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {error && (
-              <Alert variant="destructive">
+              <Alert variant="destructive" className="animate-fade-in">
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
 
             {success && (
-              <Alert className="border-green-500 bg-green-50 text-green-700">
+              <Alert className="border-emerald-500 bg-emerald-50 text-emerald-700 animate-fade-in">
                 <AlertDescription>{success}</AlertDescription>
               </Alert>
             )}
 
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-3">
               {teams.map(team => (
                 <button
                   key={team.id}
                   type="button"
                   onClick={() => toggleTeam(team.id)}
                   className={cn(
-                    "rounded-full px-4 py-2 text-sm transition-colors flex items-center gap-2",
+                    "rounded-full px-5 py-2.5 text-sm font-medium transition-all",
                     selectedIds.includes(team.id)
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                      ? "bg-emerald-500 text-white shadow-md"
+                      : "bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-border"
                   )}
                 >
-                  {selectedIds.includes(team.id) && <Check className="h-4 w-4" />}
+                  {selectedIds.includes(team.id) && <Check className="inline h-4 w-4 mr-1.5" />}
                   {team.name}
                 </button>
               ))}
             </div>
 
-            <p className="text-sm text-muted-foreground">
-              {selectedIds.length}/5 equipos seleccionados
-            </p>
+            <div className="flex items-center justify-between pt-2">
+              <p className="text-sm text-muted-foreground">
+                <span className="font-semibold text-foreground">{selectedIds.length}</span>/5 equipos seleccionados
+              </p>
+              {selectedIds.length >= 5 && (
+                <p className="text-xs text-amber-600">Máximo alcanzado</p>
+              )}
+            </div>
 
             <Button
               onClick={handleSave}
               disabled={isSaving}
-              className="w-full"
+              className="w-full h-12 text-base font-semibold bg-primary hover:bg-primary/90"
             >
               {isSaving ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-5 w-5 animate-spin" />
               ) : (
                 'Guardar cambios'
               )}
             </Button>
           </CardContent>
         </Card>
+
+        <Link to="/app/dashboard" className="block mt-6">
+          <Button variant="outline" className="w-full h-12 border-border">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Volver al inicio
+          </Button>
+        </Link>
       </main>
     </div>
   )

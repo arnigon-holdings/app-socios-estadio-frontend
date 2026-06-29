@@ -28,15 +28,20 @@ export function SelfieCapture({ onCapture, onError }: SelfieCaptureProps) {
 
   useEffect(() => {
     checkCamera()
-    return () => {
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop())
+  }, [checkCamera])
+
+  useEffect(() => {
+    if (stream && videoRef.current) {
+      videoRef.current.srcObject = stream
+      videoRef.current.onloadedmetadata = () => {
+        videoRef.current?.play()
       }
     }
-  }, [stream, checkCamera])
+  }, [stream])
 
   const startCamera = async () => {
     setCameraError(null)
+    setIsCapturing(true)
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: {
@@ -47,10 +52,8 @@ export function SelfieCapture({ onCapture, onError }: SelfieCaptureProps) {
         audio: false,
       })
       setStream(mediaStream)
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream
-      }
     } catch (err) {
+      setIsCapturing(false)
       const message = err instanceof Error ? err.message : 'Error al acceder a la cámara'
       if (message.includes('Permission denied') || message.includes('NotAllowedError')) {
         setCameraError('Permiso de cámara denegado. Por favor permite el acceso a la cámara en tu navegador.')
@@ -77,6 +80,11 @@ export function SelfieCapture({ onCapture, onError }: SelfieCaptureProps) {
     const context = canvas.getContext('2d')
 
     if (!context) return
+
+    if (video.videoWidth === 0 || video.videoHeight === 0) {
+      onError('La cámara no está lista. Intenta de nuevo.')
+      return
+    }
 
     canvas.width = video.videoWidth
     canvas.height = video.videoHeight
@@ -111,7 +119,7 @@ export function SelfieCapture({ onCapture, onError }: SelfieCaptureProps) {
     reader.readAsDataURL(file)
   }
 
-  if (isCapturing && stream) {
+  if (isCapturing) {
     return (
       <div className="flex flex-col items-center gap-4">
         <div className="relative">
@@ -158,7 +166,7 @@ export function SelfieCapture({ onCapture, onError }: SelfieCaptureProps) {
 
       <div className="flex gap-4">
         {hasCamera ? (
-          <Button onClick={() => { startCamera(); setIsCapturing(true); }} className="flex-1">
+          <Button onClick={() => { startCamera(); }} className="flex-1">
             <Camera className="h-4 w-4 mr-2" />
             Usar Cámara
           </Button>
